@@ -334,7 +334,7 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
     wf.current_weight = wf.current_weight - lose_fat
     week += 1
     print('')
-    print Logger.FAIL + "本周需要准备的食材:"
+    print(Logger.FAIL + "本周需要准备的食材:")
     flag = 1
     if len(plans) == 1:
         flag = 7
@@ -343,7 +343,7 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
             print(Logger.FAIL + "\t%s份\t%s" % ('%.1f' % (v * flag), k))
 
     print('')
-    print "平均数据:"
+    print("平均数据:")
     print('')
     print("\t基础代谢: \t\t%skcal" % ('%.0f' % bmi))
     print("\t活动代谢: \t\t%skcal" % ('%.0f' % bee))
@@ -388,7 +388,7 @@ class Prepare:
         parser.add_argument("-s", "--sex", default="man",
                             help="性别",
                             choices=['man', 'woman'])
-        parser.add_argument("-w", "--weight", help="当前体重", type=float)
+        parser.add_argument("-w", "--weight", help="当前体重", type=float, required=True)
         parser.add_argument("-a", "--age", help="年龄", type=int, default=27)
         parser.add_argument("-g", "--height", help="身高", type=int, default=180)
         parser.add_argument("--bfr", help="体脂率", type=float, default=0.0)
@@ -407,7 +407,7 @@ class Prepare:
                             help="碳水循环参数",
                             type=str,
                             default=["middle", "low", "middle", "middle", "low", "none", "high"],
-                            choices=["middle", "low", "none", "high", "increase", "rest"]
+                            choices=["middle", "low", "none", "high", "increase", "rest", "d", "z", "g", "dt", "zj", "xz"]
                             )
 
         group = parser.add_argument_group('prediction weight')
