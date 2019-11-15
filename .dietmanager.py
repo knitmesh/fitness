@@ -139,6 +139,20 @@ nutrient_map = {
         "exclude_foods": [],
     },
 }
+nutrient_name_map = {
+    "high": "high",
+    "middle": "middle",
+    "low": "low",
+    "none": "none",
+    "rest": "rest",
+    "increase": "increase",
+    "g": "high",
+    "z": "middle",
+    "d": "low",
+    "dt": "none",
+    "xx": "rest",
+    "zj": "increase",
+}
 
 
 class WeightControlFactory:
@@ -177,7 +191,7 @@ class WeightControlFactory:
 
     def pai(self, schema):
         """计算一天的卡路里"""
-        nmap = nutrient_map.get(schema)
+        nmap = nutrient_map[nutrient_name_map[schema]]
         DB = self.current_weight * nmap['DB']
         ZF = self.current_weight * nmap['ZF']
         TS = self.current_weight * nmap['TS']
@@ -207,7 +221,7 @@ class WeightControlFactory:
         print("\t大于活动代谢 %s kcal" % ('%.0f' % (practical_kcal - self.bee)))
         print('')
         print(Logger.HEADER + '*****************************************************' + Logger.ENDC)
-
+        print('')
         return plan_kcal_total
 
     def control_fat(self, plans):
@@ -270,7 +284,7 @@ class WeightControlFactory:
         record_eat = Eat()
         # 先添加指定数量的食物
         for food_name, number in self.food_menu.items():
-            if food_name in nutrient_map[schema]['exclude_foods']:
+            if food_name in nutrient_map[nutrient_name_map[schema]]['exclude_foods']:
                 continue
             if number < 0:
                 # 如果数量小于 0 , 指定默认值10
@@ -407,7 +421,7 @@ class Prepare:
                             help="碳水循环参数",
                             type=str,
                             default=["middle", "low", "middle", "middle", "low", "none", "high"],
-                            choices=["middle", "low", "none", "high", "increase", "rest", "d", "z", "g", "dt", "zj", "xz"]
+                            choices=["middle", "low", "none", "high", "increase", "rest", "d", "z", "g", "dt", "zj", "xx"]
                             )
 
         group = parser.add_argument_group('prediction weight')
