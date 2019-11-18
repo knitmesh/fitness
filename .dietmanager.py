@@ -5,9 +5,6 @@ import argparse
 
 import collections
 
-import time
-
-
 class Logger:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -35,9 +32,10 @@ class Eat:
 
 
 class FoodObject:
-    def __init__(self, name, type, protein, fat, carbohydrate, kcal, unit):
+    def __init__(self, name, type, protein, fat, carbohydrate, kcal, unit, burdening=None):
         self.name = name  # 名称
         self.type = type  # 类型
+        self.burdening = burdening
 
         if type == 'carbohydrate':
             # 碳水中的蛋白质利用率只有1/2
@@ -84,13 +82,19 @@ class FoodObject:
 
 FOOD_MENU = {
     "egg": FoodObject('煮鸡蛋', 'protein', 7.3, 6.3, 1.3, 91, '中等'),
-    "powder": FoodObject('蛋白粉', 'protein', 27, 0, 1, 115, '30g'),
+    # 配料: 240ml 纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉
+    "shake": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 78, 632, '中等',
+                        burdening="配料: 240ml纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉"),
+    "powder": FoodObject('蛋白粉', 'protein', 9, 0, 0.33, 38, '10g'),
     "beef": FoodObject('牛里脊', 'protein', 22.2, 0.9, 2.4, 107, '100g'),
     "chicken": FoodObject('鸡胸肉', 'protein', 19.4, 5, 2.5, 133, '100g'),
     "milk": FoodObject('低脂牛奶', 'protein', 8.8, 3.8, 12.3, 118, '250ml'),
+    "yogurt": FoodObject('酸牛奶', 'protein', 4.2, 4.9, 7, 90, '140ml'),
+    "banana": FoodObject('香蕉(中)', 'carbohydrate', 1.7, 0.2, 27.3, 115, '一根'),
     "rice": FoodObject('杂米饭', 'carbohydrate', 4.1, 0.5, 26.8, 125, '100g'),
     "glucose": FoodObject('葡萄糖', 'carbohydrate', 0, 0, 9.6, 39, '10g'),
     "oat": FoodObject('燕麦片', 'carbohydrate', 3, 1.5, 12.5, 76, '25g'),
+    "ggoat": FoodObject('桂格燕麦', 'carbohydrate', 2.8, 2.3, 15.1, 98, '25g'),
     "oil": FoodObject('花生油', 'fat', 0, 5, 0, 44, '5ml'),
     "nuts": FoodObject('夏威夷果', 'fat', 0.8, 6.7, 1.9, 71, '10g'),
 }
@@ -252,6 +256,8 @@ class WeightControlFactory:
             print("")
             print('  %s\t %s 份 (%s/份)\t热量:\t%s kcal' % (
             food.name, round(food.number, 2), food.unit, ('%.0f' % food.kcal_total)))
+            if food.burdening:
+                print("  %s" % food.burdening)
 
     def over_fed(self, DB, ZF, TS, prepare_food, record_eat):
 
@@ -292,13 +298,14 @@ class WeightControlFactory:
             while number > 0:
                 food = FOOD_MENU[food_name](number)
                 if food.type == 'protein' and DB < (record_eat.protein_total + food.protein_total):
-                    number -= 0.1
+                    number = float('%.6f' % (number - 0.1))
                     continue
                 if food.type == 'fat' and ZF < (record_eat.fat_total + food.fat_total):
                     number -= 0.5
+                    number = float('%.6f' % (number - 0.5))
                     continue
                 if food.type == 'carbohydrate' and TS < (record_eat.carbohydrate_total + food.carbohydrate_total):
-                    number -= 0.1
+                    number = float('%.6f' % (number - 0.1))
                     continue
 
                 if food.type in prepare_food:
@@ -443,7 +450,8 @@ class Prepare:
         # 食物列表
         food_menu = collections.OrderedDict()
         food_menu['egg'] = 3
-        food_menu['powder'] = 2
+        food_menu['shake'] = 1
+        food_menu['powder'] = 4
         food_menu['milk'] = 3
         food_menu['beef'] = 3
         food_menu['oil'] = 4
