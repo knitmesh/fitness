@@ -85,7 +85,7 @@ FOOD_MENU = {
     # 配料: 240ml 纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉
     "shake": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 96.3, 710, '高糖',
                         burdening="配料: 240ml纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉, 20g葡萄糖"),
-    "shake2": FoodObject('蛋白奶昔(低糖)', 'protein', 36.6, 18, 78, 632, '低糖',
+    "shake2": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 78, 632, '低糖',
                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 50g燕麦, 20g蛋白粉"),
     "powder": FoodObject('蛋白粉', 'protein', 9, 0, 0.33, 38, '10g'),
     "beef": FoodObject('牛里脊', 'protein', 22.2, 0.9, 2.4, 107, '100g'),
