@@ -83,8 +83,10 @@ class FoodObject:
 FOOD_MENU = {
     "egg": FoodObject('煮鸡蛋', 'protein', 7.3, 6.3, 1.3, 91, '中等'),
     # 配料: 240ml 纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉
-    "shake": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 78, 632, '中等',
-                        burdening="配料: 240ml纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉"),
+    "shake": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 96.3, 710, '高糖',
+                        burdening="配料: 240ml纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉, 20g葡萄糖"),
+    "shake2": FoodObject('蛋白奶昔(低糖)', 'protein', 36.6, 18, 78, 632, '低糖',
+                         burdening="配料: 240ml纯牛奶, 140ml酸奶, 50g燕麦, 20g蛋白粉"),
     "powder": FoodObject('蛋白粉', 'protein', 9, 0, 0.33, 38, '10g'),
     "beef": FoodObject('牛里脊', 'protein', 22.2, 0.9, 2.4, 107, '100g'),
     "chicken": FoodObject('鸡胸肉', 'protein', 19.4, 5, 2.5, 133, '100g'),
@@ -96,7 +98,7 @@ FOOD_MENU = {
     "oat": FoodObject('燕麦片', 'carbohydrate', 3, 1.5, 12.5, 76, '25g'),
     "ggoat": FoodObject('桂格燕麦', 'carbohydrate', 2.8, 2.3, 15.1, 98, '25g'),
     "oil": FoodObject('花生油', 'fat', 0, 5, 0, 44, '5ml'),
-    "nuts": FoodObject('夏威夷果', 'fat', 0.8, 6.7, 1.9, 71, '10g'),
+    "nuts": FoodObject('夏威夷果', 'fat', 0.8, 6.7, 1.9, 71, '两粒'),
 }
 
 nutrient_map = {
@@ -130,16 +132,16 @@ nutrient_map = {
     },
     "rest": {
         "alias": "修整日",
-        "DB": 2.2,
+        "DB": 2,
         "ZF": 1.2,
-        "TS": 4.5,
+        "TS": 5,
         "exclude_foods": ['glucose'],
     },
     "increase": {
         "alias": "增肌日",
-        "DB": 2.2,
+        "DB": 2,
         "ZF": 1.2,
-        "TS": 4.5,
+        "TS": 5,
         "exclude_foods": [],
     },
 }
@@ -458,7 +460,7 @@ class Prepare:
         food_menu['nuts'] = 4
         food_menu['chicken'] = -1
         # 最后再吃碳水类
-        food_menu['glucose'] = 6
+        food_menu['glucose'] = 4
         food_menu['oat'] = 2
         food_menu['rice'] = -1
         simulate(args.weight,
