@@ -81,12 +81,18 @@ class FoodObject:
 
 
 FOOD_MENU = {
-    "egg": FoodObject('煮鸡蛋', 'protein', 7.3, 6.3, 1.3, 91, '中等'),
-    # 配料: 240ml 纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉
-    "shake": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 96.3, 710, '高糖',
-                        burdening="配料: 240ml纯牛奶, 140ml酸奶, 一根香蕉, 50g燕麦, 20g蛋白粉, 20g葡萄糖"),
-    "shake2": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 78, 632, '低糖',
-                         burdening="配料: 240ml纯牛奶, 140ml酸奶, 50g燕麦, 20g蛋白粉"),
+    "egg": FoodObject('煮鸡蛋', 'protein', 7.3, 6.3, 1.3, 91, '全蛋'),
+    "egg-white": FoodObject('煮鸡蛋', 'protein', 3.5, 0, 1, 18, '蛋白'),
+
+    # 高糖奶昔
+    "shake-g": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 96.3, 710, '高糖',
+                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉, 50g燕麦, 一根香蕉, 20g葡萄糖"),
+    # 中糖奶昔
+    "shake-z": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 77.2, 632, '中糖',
+                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉, 50g燕麦, 一根香蕉"),
+    # 低糖奶昔
+    "shake-d": FoodObject('蛋白奶昔', 'protein', 29.4, 13.3, 19.7, 320, '低糖',
+                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉"),
     "powder": FoodObject('蛋白粉', 'protein', 9, 0, 0.33, 38, '10g'),
     "beef": FoodObject('牛里脊', 'protein', 22.2, 0.9, 2.4, 107, '100g'),
     "chicken": FoodObject('鸡胸肉', 'protein', 19.4, 5, 2.5, 133, '100g'),
@@ -107,42 +113,54 @@ nutrient_map = {
         "DB": 1.8,
         "ZF": 1.2,
         "TS": 3.5,
-        "exclude_foods": ['glucose'],
+        "exclude_foods": [],
+        "assign_foods": {'shake-z': 1},
     },
     "middle": {
         "alias": "中碳日",
         "DB": 1.8,
         "ZF": 1.2,
         "TS": 2.5,
-        "exclude_foods": ['glucose'],
+        "exclude_foods": [],
+        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 7},
     },
     "low": {
         "alias": "低碳日",
         "DB": 2,
         "ZF": 1.2,
         "TS": 1.5,
-        "exclude_foods": ['glucose'],
+        "exclude_foods": ['powder'],
+        "assign_foods": {'shake-d': 1, 'egg-white': 8},
     },
     "none": {
         "alias": "断碳日",
         "DB": 2,
         "ZF": 1.2,
         "TS": 0.5,
-        "exclude_foods": ['glucose', 'milk', 'egg', 'oat', 'powder'],
+        "exclude_foods": ['milk', 'oat', 'powder'],
+        "assign_foods": {'shake-d': 1, 'egg-white': 6},
     },
     "rest": {
         "alias": "修整日",
         "DB": 2,
         "ZF": 1.2,
         "TS": 5,
-        "exclude_foods": ['glucose'],
+        "exclude_foods": [],
+        "assign_foods": {
+            'glucose': 4,
+            'shake-g': 1,
+                         },
     },
     "increase": {
         "alias": "增肌日",
         "DB": 2,
         "ZF": 1.2,
         "TS": 5,
-        "exclude_foods": [],
+        "exclude_foods": ['shake-z', 'shake-d'],
+        "assign_foods": {
+            'glucose': 4,
+            'shake-g': 1,
+                         },
     },
 }
 nutrient_name_map = {
@@ -156,7 +174,7 @@ nutrient_name_map = {
     "z": "middle",
     "d": "low",
     "dt": "none",
-    "xx": "rest",
+    "xz": "rest",
     "zj": "increase",
 }
 
@@ -290,6 +308,10 @@ class WeightControlFactory:
         """参考食用的食物"""
         prepare_food = {}
         record_eat = Eat()
+
+
+        # 更新食物列表
+        self.food_menu.update(nutrient_map[nutrient_name_map[schema]]['assign_foods'])
         # 先添加指定数量的食物
         for food_name, number in self.food_menu.items():
             if food_name in nutrient_map[nutrient_name_map[schema]]['exclude_foods']:
@@ -430,7 +452,7 @@ class Prepare:
                             help="碳水循环参数",
                             type=str,
                             default=["middle", "low", "middle", "middle", "low", "none", "high"],
-                            choices=["middle", "low", "none", "high", "increase", "rest", "d", "z", "g", "dt", "zj", "xx"]
+                            choices=["middle", "low", "none", "high", "increase", "rest", "d", "z", "g", "dt", "zj", "xz"]
                             )
 
         group = parser.add_argument_group('prediction weight')
@@ -451,8 +473,15 @@ class Prepare:
             return
         # 食物列表
         food_menu = collections.OrderedDict()
+
+        food_menu['shake-g'] = 0
+        food_menu['shake-z'] = 0
+        food_menu['shake-d'] = 0
+        food_menu['glucose'] = 0
+        food_menu['egg-white'] = 0
+
         food_menu['egg'] = 3
-        food_menu['shake'] = 1
+
         food_menu['powder'] = 4
         food_menu['milk'] = 3
         food_menu['beef'] = 3
@@ -460,7 +489,6 @@ class Prepare:
         food_menu['nuts'] = 4
         food_menu['chicken'] = -1
         # 最后再吃碳水类
-        food_menu['glucose'] = 4
         food_menu['oat'] = 2
         food_menu['rice'] = -1
         simulate(args.weight,
