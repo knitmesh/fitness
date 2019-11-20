@@ -311,9 +311,12 @@ class WeightControlFactory:
 
 
         # 更新食物列表
-        self.food_menu.update(nutrient_map[nutrient_name_map[schema]]['assign_foods'])
+        menus = collections.OrderedDict()
+        menus.update(self.food_menu)
+        menus.update(nutrient_map[nutrient_name_map[schema]]['assign_foods'])
+
         # 先添加指定数量的食物
-        for food_name, number in self.food_menu.items():
+        for food_name, number in menus.items():
             if food_name in nutrient_map[nutrient_name_map[schema]]['exclude_foods']:
                 continue
             if number < 0:
