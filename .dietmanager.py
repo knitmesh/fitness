@@ -5,13 +5,6 @@ import argparse
 
 import collections
 
-class Logger:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
 
 
 class Eat:
@@ -221,30 +214,30 @@ class WeightControlFactory:
         TS = self.current_weight * nmap['TS']
 
         plan_kcal_total = (DB + TS) * 4 + ZF * 9
-        print(nmap['alias'])
+        print('### ' + nmap['alias'])
         print("")
-        print("以体重%skg计算, 三大营养素配比:" % self.current_weight)
-        print("\t蛋白质\t\t %sg" % ('%.0f' % DB))
-        print("\t脂肪\t\t %sg" % ('%.0f' % ZF))
-        print("\t碳水\t\t %sg" % ('%.0f' % TS))
+        print("#### 以体重%skg计算, 三大营养素配比:" % ('%.0f' % self.current_weight))
+        print("* 蛋白质  \t %sg" % ('%.0f' % DB))
+        print("* 脂肪\t\t %sg" % ('%.0f' % ZF))
+        print("* 碳水\t\t %sg" % ('%.0f' % TS))
         print('')
-        print('参考饮食可食用食物份量:')
+        print('#### 参考饮食可食用食物份量:')
         practical_kcal = self.reference_food(DB, ZF, TS, schema)
         print("")
 
-        print("计划饮食:")
-        print("\t总热量 %skcal" % ('%.0f' % plan_kcal_total))
+        print("#### 计划饮食:")
+        print("  	总热量 %skcal" % ('%.0f' % plan_kcal_total))
 
-        print("\t大于基础代谢 %s kcal" % ('%.0f' % (plan_kcal_total - self.bmi)))
-        print("\t大于活动代谢 %s kcal" % ('%.0f' % (plan_kcal_total - self.bee)))
+        print("  	大于基础代谢 %s kcal" % ('%.0f' % (plan_kcal_total - self.bmi)))
+        print("  	大于活动代谢 %s kcal" % ('%.0f' % (plan_kcal_total - self.bee)))
         print('')
-        print("参考饮食:")
-        print("\t总热量 %skcal" % ('%.2f' % practical_kcal))
+        print("#### 参考饮食:")
+        print("  	总热量 %skcal" % ('%.2f' % practical_kcal))
 
-        print("\t大于基础代谢 %s kcal" % ('%.0f' % (practical_kcal - self.bmi)))
-        print("\t大于活动代谢 %s kcal" % ('%.0f' % (practical_kcal - self.bee)))
+        print("  	大于基础代谢 %s kcal" % ('%.0f' % (practical_kcal - self.bmi)))
+        print("  	大于活动代谢 %s kcal" % ('%.0f' % (practical_kcal - self.bee)))
         print('')
-        print(Logger.HEADER + '*****************************************************' + Logger.ENDC)
+        print('*****************************************************')
         print('')
         return plan_kcal_total
 
@@ -255,7 +248,7 @@ class WeightControlFactory:
         week_kacl_total = 0
         for index, val in enumerate(plans):
             if len(plans) == 7:
-                print('星期%s' % (index + 1))
+                print('## 星期%s' % (index + 1))
 
             week_kacl_total = week_kacl_total + self.pai(val)
         return week_kacl_total
@@ -274,10 +267,14 @@ class WeightControlFactory:
             self.week_food[food_name] = food.number
         if food.number > 0:
             print("")
-            print('  %s\t %s 份 (%s/份)\t热量:\t%s kcal' % (
-            food.name, round(food.number, 2), food.unit, ('%.0f' % food.kcal_total)))
+            if len(food.name) < 4:
+                fname = food.name + (4 - len(food.name)) * "\t"
+            else:
+                fname = food.name + "    "
+            print('  	%s  	%s 份 (%s/份)\t\t\t热量:   	%s kcal' % (
+                fname, round(food.number, 2), food.unit, ('%.0f' % food.kcal_total)))
             if food.burdening:
-                print("  %s" % food.burdening)
+                print("  	%s" % food.burdening)
 
     def over_fed(self, DB, ZF, TS, prepare_food, record_eat):
 
@@ -353,13 +350,13 @@ class WeightControlFactory:
         kcal_residue = zf_residue * 9 + (db_residue + ts_residue) * 4
 
         print("")
-        print("参考饮食外还可额外摄入:")
-        print("\t脂肪:\t\t %sg" % ('%.1f' % zf_residue))
-        print("\t蛋白质:\t\t %sg" % ('%.1f' % db_residue))
-        print("\t碳水:\t\t %sg" % ('%.1f' % ts_residue))
+        print("#### 参考饮食外还可额外摄入:")
+        print("* 脂肪:\t\t %sg" % ('%.1f' % zf_residue))
+        print("* 蛋白质:   \t %sg" % ('%.1f' % db_residue))
+        print("* 碳水:\t\t %sg" % ('%.1f' % ts_residue))
         if kcal_residue > 0:
             print("")
-            print((Logger.FAIL + '\t参考饮食外最多还可摄入%skcal, 建议以蔬菜作为补充' + Logger.ENDC) % ('%.0f' % kcal_residue))
+            print('\t参考饮食外最多还可摄入%skcal, 建议以蔬菜作为补充' % ('%.0f' % kcal_residue))
 
         print("")
         return eat.kcal_total
@@ -369,7 +366,7 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
     """模拟体重下降的的饮食参考"""
     wf = WeightControlFactory(weight, sex, age, height, food_menu, activity, bfr)
     if prediction:
-        print("-------------第%s周-------------" % (week + 1))
+        print("# 第%s周" % (week + 1))
 
     bmi = wf.bmi
     bee = wf.bee
@@ -383,38 +380,42 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
     wf.current_weight = wf.current_weight - lose_fat
     week += 1
     print('')
-    print(Logger.FAIL + "本周需要准备的食材:")
+    print("#### 本周需要准备的食材:")
     flag = 1
     if len(plans) == 1:
         flag = 7
     for k, v in wf.week_food.items():
         if v * flag > 0:
-            print(Logger.FAIL + "\t%s份\t%s" % ('%.1f' % (v * flag), k))
+            print("  	%s份\t%s" % ('%.1f' % (v * flag), k))
 
     print('')
-    print("平均数据:")
+    print("#### 平均数据:")
     print('')
-    print("\t基础代谢: \t\t%skcal" % ('%.0f' % bmi))
-    print("\t活动代谢: \t\t%skcal" % ('%.0f' % bee))
-    print("\t日平均摄入: \t\t%skcal" % ('%.0f' % (week_kcal_total / len(plans))))
+    print("* 基础代谢: \t\t%skcal" % ('%.0f' % bmi))
+    print("* 活动代谢: \t\t%skcal" % ('%.0f' % bee))
+    print("* 日平均摄入: \t\t%skcal" % ('%.0f' % (week_kcal_total / len(plans))))
     mean_kcal = (week_kcal_total - bee * len(plans)) / len(plans)
     if mean_kcal > 0:
-        print("\t日平均热量盈余: \t%skcal" % ('%.0f' % mean_kcal))
+        print("* 日平均热量盈余: \t%skcal" % ('%.0f' % mean_kcal))
     else:
-        print("\t日平均热量缺口: \t%skcal" % ('%.0f' % mean_kcal))
+        print("* 日平均热量缺口: \t%skcal" % ('%.0f' % mean_kcal))
     print('')
     if len(plans) == 7:
-        print("以计划饮食热量推测:")
-        print("\t本周预计体重: \t%s kg" % ('%.2f' % wf.current_weight))
+        print("#### 以计划饮食热量推测:")
+        print("* 本周预计体重: \t%s kg" % ('%.2f' % wf.current_weight))
         if lose_fat > 0:
-            print("\t本周预计减脂: \t%s kg" % ('%.2f' % lose_fat))
+            print("* 本周预计减脂: \t%s kg" % ('%.2f' % lose_fat))
         else:
-            print("\t本周预计增重: \t%s kg" % ('%.2f' % (lose_fat * -1)))
+            print("* 本周预计增重: \t%s kg" % ('%.2f' % (lose_fat * -1)))
 
     if prediction:
-        print("减至目标体重%skg 预计还需约 %s周" % (
-            target_weight, ('%.2f' % ((wf.current_weight - target_weight) * 7700 / ((bee - week_kcal_total / 7) * 7)))))
-    print(Logger.OKGREEN + "-------------------------------------------" + Logger.ENDC)
+        week_forecast = ('%.2f' % ((wf.current_weight - target_weight) * 7700 / ((bee - week_kcal_total / 7) * 7)))
+        if float(week_forecast) > 0:
+            print("* 减至目标体重%skg 预计还需约 %s周" % (target_weight, week_forecast))
+        else:
+            print('')
+            print("* 已达到目标体重")
+    print("-------------------------------------------")
     print('')
 
     if prediction:
@@ -423,9 +424,9 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
             simulate(wf.current_weight, target_weight, food_menu, plans, sex, age, height, activity, bfr, week,
                      prediction)
         else:
-            print(Logger.HEADER + "-------------------------------------------" + Logger.ENDC)
-            print('预计需历时%s周, 达到目标体重%skg' % (week, '%.2f' % wf.current_weight))
-            print(Logger.HEADER + "-------------------------------------------" + Logger.ENDC)
+            print("-------------------------------------------")
+            print('预计需历时%s周, 可达到目标体重%skg' % (week, '%.2f' % wf.current_weight))
+            print("-------------------------------------------")
             return
 
 
