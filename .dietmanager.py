@@ -134,7 +134,7 @@ nutrient_map = {
     },
     "none": {
         "alias": "断碳日",
-        "DB": 2,
+        "DB": 2.2,
         "ZF": 1.2,
         "TS": 0.5,
         "exclude_foods": ['milk', 'oat', 'powder'],
@@ -142,7 +142,7 @@ nutrient_map = {
     },
     "rest": {
         "alias": "修整日",
-        "DB": 2,
+        "DB": 1.6,
         "ZF": 1.2,
         "TS": 5,
         "exclude_foods": [],
@@ -153,7 +153,7 @@ nutrient_map = {
     },
     "increase": {
         "alias": "增肌日",
-        "DB": 2,
+        "DB": 1.6,
         "ZF": 1.2,
         "TS": 5,
         "exclude_foods": ['shake-z', 'shake-d'],
@@ -223,7 +223,7 @@ class WeightControlFactory:
         plan_kcal_total = (DB + TS) * 4 + ZF * 9
         print(nmap['alias'])
         print("")
-        print("三大营养素配比:")
+        print("以体重%skg计算, 三大营养素配比:" % self.current_weight)
         print("\t蛋白质\t\t %sg" % ('%.0f' % DB))
         print("\t脂肪\t\t %sg" % ('%.0f' % ZF))
         print("\t碳水\t\t %sg" % ('%.0f' % TS))
@@ -309,7 +309,6 @@ class WeightControlFactory:
         prepare_food = {}
         record_eat = Eat()
 
-
         # 更新食物列表
         menus = collections.OrderedDict()
         menus.update(self.food_menu)
@@ -352,13 +351,15 @@ class WeightControlFactory:
         db_residue = DB - eat.protein_total
         ts_residue = TS - eat.carbohydrate_total
         kcal_residue = zf_residue * 9 + (db_residue + ts_residue) * 4
+
         print("")
         print("参考饮食外还可额外摄入:")
         print("\t脂肪:\t\t %sg" % ('%.1f' % zf_residue))
         print("\t蛋白质:\t\t %sg" % ('%.1f' % db_residue))
         print("\t碳水:\t\t %sg" % ('%.1f' % ts_residue))
-        print("")
-        print((Logger.FAIL + '\t参考饮食外最多还可摄入%skcal, 建议以蔬菜作为补充' + Logger.ENDC) % ('%.0f' % kcal_residue))
+        if kcal_residue > 0:
+            print("")
+            print((Logger.FAIL + '\t参考饮食外最多还可摄入%skcal, 建议以蔬菜作为补充' + Logger.ENDC) % ('%.0f' % kcal_residue))
 
         print("")
         return eat.kcal_total
@@ -476,22 +477,23 @@ class Prepare:
             return
         # 食物列表
         food_menu = collections.OrderedDict()
-
+        # 定制数量食物
         food_menu['shake-g'] = 0
         food_menu['shake-z'] = 0
         food_menu['shake-d'] = 0
         food_menu['glucose'] = 0
         food_menu['egg-white'] = 0
 
-        food_menu['egg'] = 3
+        # 通用类食物
+        food_menu['egg'] = 2
 
         food_menu['powder'] = 4
-        food_menu['milk'] = 3
+        food_menu['milk'] = 0
         food_menu['beef'] = 3
         food_menu['oil'] = 4
         food_menu['nuts'] = 4
         food_menu['chicken'] = -1
-        # 最后再吃碳水类
+        # 最后吃碳水类
         food_menu['oat'] = 2
         food_menu['rice'] = -1
         simulate(args.weight,
