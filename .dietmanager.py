@@ -516,3 +516,6 @@ def main(argv=sys.argv[1:]):
 
 if __name__ == '__main__':
     sys.exit(main())
+
+
+# python .dietmanager -w 80 --plans zj > dietmanager.md
