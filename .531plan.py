@@ -71,6 +71,3 @@ def main(argv=sys.argv[1:]):
 
 if __name__ == '__main__':
     sys.exit(main())
-
-
-## python .531plan -s 100 -w 80 -t 40 -y 120 > 531plan.md
