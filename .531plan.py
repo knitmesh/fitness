@@ -12,9 +12,44 @@ CYCLE_PLANS = [
     ['## 第四周', ((0.6, 5), (0.65, 5), (0.7, 5)), 'Deload ｜辅助训练'],
 ]
 
-def result_plan(xlzl, add_load, name, plans, des):
+def warm_up_set(xlzl, add_load, plan):
+    # 热身组重量百分比
     outstrs = []
-    print(name)
+    # warm_plans = ((0.2, 10), (0.2, 10), (0.4, 8), (0.6, 5), (0.6, 5), (0.8, 2), (0.9, 1))
+    warm_plans = (0.15, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9)
+    # 次数
+    warm_rm = (5, 5, 5, 5, 3, 2, 1)
+
+    xlr = int('%.0f' % (((plan[0] * xlzl * 0.9) + add_load) / 2.5)) * 2.5
+    pass
+    index = 1
+    index_warm = 1
+    skip = 0
+    for p in warm_plans:
+        # 训练重量 = 1rm * 0.9 * 计划重量比率
+
+        xlr_warm = int('%.0f' % (((p * xlr)) / 5)) * 5
+        if xlr_warm < 20:
+            skip += 1
+            continue
+        outstr = '\t第%s组: %skg\t%s次' % (index, xlr_warm, warm_rm[index_warm - 1])
+        if skip > 1:
+            index_warm += 1
+            skip -= 1
+        index_warm += 1
+        index += 1
+        print(outstr)
+        outstrs.append(outstr)
+    pass
+
+
+def result_plan(xlzl, add_load, plans, des, name=''):
+    outstrs = []
+    if name:
+        print(name)
+    print("#### 热身组:")
+    warm_up_set(xlzl, add_load, plans[0])
+    print("#### 正式组:")
     for i, p in enumerate(plans):
         # 训练重量 = 1rm * 0.9 * 计划重量比率
 
@@ -22,6 +57,7 @@ def result_plan(xlzl, add_load, name, plans, des):
         outstr = '\t第%s组: %skg\t%s次\t%s\tload: %s' % (i+1, xlr, p[1], des, str(p[0]*100) + '%')
         print(outstr)
         outstrs.append(outstr)
+    print("---")
 
 
 def plan(sd, wt, tj, yl, cycle):
@@ -36,16 +72,17 @@ def plan(sd, wt, tj, yl, cycle):
             add_tj_load = 2.5 * flag
             add_yl_load = 5 * flag
 
-            result_plan(sd, add_sd_load, "### 深蹲 (周一)", plans[1], plans[2])
-            result_plan(wt, add_wt_load, "### 卧推 (周二)", plans[1], plans[2])
-            result_plan(tj, add_tj_load, "### 推举 (周四)", plans[1], plans[2])
-            result_plan(yl, add_yl_load, "### 硬拉 (周五)", plans[1], plans[2])
-            print('---')
+            result_plan(sd, add_sd_load, plans[1], plans[2], name="### 深蹲 (周一)")
+            result_plan(wt, add_wt_load, plans[1], plans[2], name="### 卧推 (周二)")
+            result_plan(yl, add_yl_load, plans[1], plans[2], name="### 硬拉 (周四)")
+            result_plan(tj, add_tj_load, plans[1], plans[2], name="### 推举 (周五)")
+            print('')
+            print('')
+            print('')
         print('')
 
-        print('---')
         flag += 1
-    print('起始1rm, 卧推: %s kg 深蹲: %s kg 推举: %s kg 硬拉: %s kg' % (wt, sd, tj, yl))
+    print('总周期数: %s    起始重量(1rm), 卧推: %s kg 深蹲: %s kg 推举: %s kg 硬拉: %s kg' % (cycle, wt, sd, tj, yl))
 
 class Prepare:
     parser = None
