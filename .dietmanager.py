@@ -6,6 +6,77 @@ import argparse
 import collections
 
 
+nutrient_map = {
+    "high": {
+        "alias": "高碳日",
+        "DB": 1.8,
+        "ZF": 1.2,
+        "TS": 3.5,
+        "exclude_foods": [],
+        "assign_foods": {'shake-z': 1},
+    },
+    "middle": {
+        "alias": "中碳日",
+        "DB": 1.9,
+        "ZF": 1,
+        "TS": 2.5,
+        "exclude_foods": [],
+        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 7},
+    },
+    "low": {
+        "alias": "低碳日",
+        "DB": 2.2,
+        "ZF": 1,
+        "TS": 1.5,
+        "exclude_foods": ['powder'],
+        "assign_foods": {'shake-d': 1, 'egg-white': 4},
+    },
+    "none": {
+        "alias": "断碳日",
+        "DB": 2.2,
+        "ZF": 1.2,
+        "TS": 0.5,
+        "exclude_foods": ['milk', 'oat', 'powder', 'powder2'],
+        "assign_foods": {'shake-d': 1, 'egg-white': 6},
+    },
+    "rest": {
+        "alias": "修整日",
+        "DB": 1.6,
+        "ZF": 1.2,
+        "TS": 5,
+        "exclude_foods": [],
+        "assign_foods": {
+            'glucose': 0,
+            'shake-g': 1,
+                         },
+    },
+    "increase": {
+        "alias": "增肌日",
+        "DB": 1.6,
+        "ZF": 1.2,
+        "TS": 5,
+        "exclude_foods": ['shake-z', 'shake-d'],
+        "assign_foods": {
+            'glucose': 80,
+            'shake-g': 1,
+                         },
+    },
+}
+nutrient_name_map = {
+    "high": "high",
+    "middle": "middle",
+    "low": "low",
+    "none": "none",
+    "rest": "rest",
+    "increase": "increase",
+    "g": "high",
+    "z": "middle",
+    "d": "low",
+    "dt": "none",
+    "xz": "rest",
+    "zj": "increase",
+}
+
 
 class Eat:
     def __init__(self):
@@ -86,89 +157,24 @@ FOOD_MENU = {
     # 低糖奶昔
     "shake-d": FoodObject('蛋白奶昔', 'protein', 29.4, 13.3, 19.7, 320, '低糖',
                           burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉"),
-    "powder": FoodObject('蛋白粉', 'protein', 9, 0, 0.33, 38, '10g'),
+    # allmax 分离乳清
+    "powder": FoodObject('蛋白粉1', 'protein', 9, 0, 0.33, 38, '10g'),
+    # myprotein 乳清蛋白
+    "powder2": FoodObject('蛋白粉2', 'protein', 7.8, 0.7, 0.6, 40, '10g'),
+    # myprotein 分离乳清蛋白 减脂用
+    "powder3": FoodObject('蛋白粉3', 'protein', 8.8, 0.03, 0.61, 38.5, '10g'),
     "beef": FoodObject('牛里脊', 'protein', 22.2, 0.9, 2.4, 107, '100g'),
     "chicken": FoodObject('鸡胸肉', 'protein', 19.4, 5, 2.5, 133, '100g'),
     "milk": FoodObject('低脂牛奶', 'protein', 8.8, 3.8, 12.3, 118, '250ml'),
     "yogurt": FoodObject('酸牛奶', 'protein', 4.2, 4.9, 7, 90, '140ml'),
     "banana": FoodObject('香蕉(中)', 'carbohydrate', 1.7, 0.2, 27.3, 115, '一根'),
     "rice": FoodObject('杂米饭', 'carbohydrate', 4.1, 0.5, 26.8, 125, '100g'),
-    "glucose": FoodObject('葡萄糖', 'carbohydrate', 0, 0, 9.6, 39, '10g'),
+    "glucose": FoodObject('葡萄糖', 'carbohydrate', 0, 0, 0.96, 3.9, '1g'),
     "oat": FoodObject('燕麦片', 'carbohydrate', 3, 1.5, 12.5, 76, '25g'),
     "ggoat": FoodObject('桂格燕麦', 'carbohydrate', 2.8, 2.3, 15.1, 98, '25g'),
     "oil": FoodObject('花生油', 'fat', 0, 5, 0, 44, '5ml'),
     "nuts": FoodObject('夏威夷果', 'fat', 0.8, 6.7, 1.9, 71, '两粒'),
-}
-
-nutrient_map = {
-    "high": {
-        "alias": "高碳日",
-        "DB": 1.8,
-        "ZF": 1.2,
-        "TS": 3.5,
-        "exclude_foods": [],
-        "assign_foods": {'shake-z': 1},
-    },
-    "middle": {
-        "alias": "中碳日",
-        "DB": 1.8,
-        "ZF": 1.2,
-        "TS": 2.5,
-        "exclude_foods": [],
-        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 7},
-    },
-    "low": {
-        "alias": "低碳日",
-        "DB": 2,
-        "ZF": 1.2,
-        "TS": 1.5,
-        "exclude_foods": ['powder'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 8},
-    },
-    "none": {
-        "alias": "断碳日",
-        "DB": 2.2,
-        "ZF": 1.2,
-        "TS": 0.5,
-        "exclude_foods": ['milk', 'oat', 'powder'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 6},
-    },
-    "rest": {
-        "alias": "修整日",
-        "DB": 1.6,
-        "ZF": 1.2,
-        "TS": 5,
-        "exclude_foods": [],
-        "assign_foods": {
-            'glucose': 4,
-            'shake-g': 1,
-                         },
-    },
-    "increase": {
-        "alias": "增肌日",
-        "DB": 1.6,
-        "ZF": 1.2,
-        "TS": 5,
-        "exclude_foods": ['shake-z', 'shake-d'],
-        "assign_foods": {
-            'glucose': 4,
-            'shake-g': 1,
-                         },
-    },
-}
-nutrient_name_map = {
-    "high": "high",
-    "middle": "middle",
-    "low": "low",
-    "none": "none",
-    "rest": "rest",
-    "increase": "increase",
-    "g": "high",
-    "z": "middle",
-    "d": "low",
-    "dt": "none",
-    "xz": "rest",
-    "zj": "increase",
+    "mrnuts": FoodObject('每日坚果', 'fat', 3.2, 10.6, 4.7, 126, '一袋'),
 }
 
 
@@ -273,8 +279,11 @@ class WeightControlFactory:
                 fname = food.name + "    "
             print('  	%s  	%s 份 (%s/份)\t\t\t热量:   	%s kcal' % (
                 fname, round(food.number, 2), food.unit, ('%.0f' % food.kcal_total)))
+            print("  	  	蛋白质: %s  	碳水: %s  	脂肪: %s" % (('%.1f' % food.protein_total),
+                                                             ('%.1f' % food.carbohydrate_total),
+                                                             ('%.1f' % food.fat_total)))
             if food.burdening:
-                print("  	%s" % food.burdening)
+                print("  	  	%s" % food.burdening)
 
     def over_fed(self, DB, ZF, TS, prepare_food, record_eat):
 
@@ -318,6 +327,8 @@ class WeightControlFactory:
             if number < 0:
                 # 如果数量小于 0 , 指定默认值10
                 number = 10
+                if food_name == 'glucose':
+                    number = self.current_weight * 1.2
             while number > 0:
                 food = FOOD_MENU[food_name](number)
                 if food.type == 'protein' and DB < (record_eat.protein_total + food.protein_total):
@@ -486,13 +497,16 @@ class Prepare:
         food_menu['egg-white'] = 0
 
         # 通用类食物
-        food_menu['egg'] = 2
-
-        food_menu['powder'] = 4
-        food_menu['milk'] = 0
-        food_menu['beef'] = 3
         food_menu['oil'] = 4
-        food_menu['nuts'] = 4
+        food_menu['mrnuts'] = 1
+        # 夏威夷果
+        # food_menu['nuts'] = 4
+
+        food_menu['egg'] = 2
+        food_menu['powder2'] = 4.5
+        food_menu['milk'] = 0
+        food_menu['beef'] = 2
+
         food_menu['chicken'] = -1
         # 最后吃碳水类
         food_menu['oat'] = 2
