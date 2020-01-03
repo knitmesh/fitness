@@ -219,6 +219,8 @@ class WeightControlFactory:
         DB = self.current_weight * nmap['DB']
         ZF = self.current_weight * nmap['ZF']
         TS = self.current_weight * nmap['TS'] - jt
+        if jt > 0 and TS < 100:
+            TS = 100
 
         plan_kcal_total = (DB + TS) * 4 + ZF * 9
         print('### ' + nmap['alias'])
