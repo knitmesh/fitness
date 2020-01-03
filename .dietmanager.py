@@ -7,29 +7,51 @@ import collections
 
 
 nutrient_map = {
+    "rest": {
+        "alias": "修整日",
+        "DB": 1.6,
+        "ZF": 1,
+        "TS": 5,
+        "exclude_foods": [],
+        "assign_foods": {
+            'glucose': 0,
+            'shake-g': 1,
+        },
+    },
+    "increase": {
+        "alias": "增肌日",
+        "DB": 1.6,
+        "ZF": 1,
+        "TS": 5,
+        "exclude_foods": ['shake-z', 'shake-d'],
+        "assign_foods": {
+            'glucose': 80,
+            'shake-g': 1,
+        },
+    },
     "high": {
         "alias": "高碳日",
         "DB": 1.8,
-        "ZF": 1.2,
+        "ZF": 1,
         "TS": 3.5,
         "exclude_foods": [],
         "assign_foods": {'shake-z': 1},
     },
     "middle": {
         "alias": "中碳日",
-        "DB": 1.9,
+        "DB": 2,
         "ZF": 1,
         "TS": 2.5,
         "exclude_foods": [],
-        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 7},
+        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 6},
     },
     "low": {
         "alias": "低碳日",
         "DB": 2.2,
-        "ZF": 1,
+        "ZF": 1.2,
         "TS": 1.5,
         "exclude_foods": ['powder'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 4},
+        "assign_foods": {'shake-d': 1, 'egg-white': 8},
     },
     "none": {
         "alias": "断碳日",
@@ -37,29 +59,7 @@ nutrient_map = {
         "ZF": 1.2,
         "TS": 0.5,
         "exclude_foods": ['milk', 'oat', 'powder', 'powder2'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 6},
-    },
-    "rest": {
-        "alias": "修整日",
-        "DB": 1.6,
-        "ZF": 1.2,
-        "TS": 5,
-        "exclude_foods": [],
-        "assign_foods": {
-            'glucose': 0,
-            'shake-g': 1,
-                         },
-    },
-    "increase": {
-        "alias": "增肌日",
-        "DB": 1.6,
-        "ZF": 1.2,
-        "TS": 5,
-        "exclude_foods": ['shake-z', 'shake-d'],
-        "assign_foods": {
-            'glucose': 80,
-            'shake-g': 1,
-                         },
+        "assign_foods": {'shake-d': 1, 'egg-white': 8},
     },
 }
 nutrient_name_map = {
@@ -149,14 +149,14 @@ FOOD_MENU = {
     "egg-white": FoodObject('煮鸡蛋', 'protein', 3.5, 0, 1, 18, '蛋白'),
 
     # 高糖奶昔
-    "shake-g": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 96.3, 710, '高糖',
-                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉, 50g燕麦, 一根香蕉, 20g葡萄糖"),
+    "shake-g": FoodObject('蛋白奶昔', 'protein', 32.4, 13.1, 89.3, 621, '高糖',
+                          burdening="配料: 240ml纯牛奶, 20g蛋白粉, 50g燕麦, 一根香蕉, 20g葡萄糖"),
     # 中糖奶昔
-    "shake-z": FoodObject('蛋白奶昔', 'protein', 36.6, 18, 77.2, 632, '中糖',
-                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉, 50g燕麦, 一根香蕉"),
+    "shake-z": FoodObject('蛋白奶昔', 'protein', 32.4, 13.1, 70.2, 543, '中糖',
+                          burdening="配料: 240ml纯牛奶, 20g蛋白粉, 50g燕麦, 一根香蕉"),
     # 低糖奶昔
-    "shake-d": FoodObject('蛋白奶昔', 'protein', 29.4, 13.3, 19.7, 320, '低糖',
-                          burdening="配料: 240ml纯牛奶, 140ml酸奶, 20g蛋白粉"),
+    "shake-d": FoodObject('蛋白奶昔', 'protein', 28, 10.7, 27.8, 329, '低糖',
+                          burdening="配料: 240ml纯牛奶, 25g燕麦, 20g蛋白粉"),
     # allmax 分离乳清
     "powder": FoodObject('蛋白粉1', 'protein', 9, 0, 0.33, 38, '10g'),
     # myprotein 乳清蛋白
@@ -179,7 +179,7 @@ FOOD_MENU = {
 
 
 class WeightControlFactory:
-    def __init__(self, weight, sex, age, height, food_menu, activity, bfr=0):
+    def __init__(self, weight, sex, age, height, food_menu, activity, detail=False, bfr=0):
         # 当前体重和目标体重
         self.current_weight = weight
         self.week_food = {}
@@ -191,6 +191,7 @@ class WeightControlFactory:
         # 活动强度
         self.activity = activity
         self.food_menu = food_menu
+        self.detail = detail
 
     @property
     def bmi(self):
@@ -212,12 +213,12 @@ class WeightControlFactory:
         # 活动代谢
         return self.bmi * self.activity
 
-    def pai(self, schema):
+    def pai(self, schema, jt=0):
         """计算一天的卡路里"""
         nmap = nutrient_map[nutrient_name_map[schema]]
         DB = self.current_weight * nmap['DB']
         ZF = self.current_weight * nmap['ZF']
-        TS = self.current_weight * nmap['TS']
+        TS = self.current_weight * nmap['TS'] - jt
 
         plan_kcal_total = (DB + TS) * 4 + ZF * 9
         print('### ' + nmap['alias'])
@@ -247,7 +248,7 @@ class WeightControlFactory:
         print('')
         return plan_kcal_total
 
-    def control_fat(self, plans):
+    def control_fat(self, plans, jt=0):
         """
         碳水循环法
         """
@@ -256,7 +257,7 @@ class WeightControlFactory:
             if len(plans) == 7:
                 print('## 星期%s' % (index + 1))
 
-            week_kacl_total = week_kacl_total + self.pai(val)
+            week_kacl_total = week_kacl_total + self.pai(val, jt)
         return week_kacl_total
 
     def write_off_weight(self, eat_obj, food):
@@ -279,9 +280,10 @@ class WeightControlFactory:
                 fname = food.name + "    "
             print('  	%s  	%s 份 (%s/份)\t\t\t热量:   	%s kcal' % (
                 fname, round(food.number, 2), food.unit, ('%.0f' % food.kcal_total)))
-            print("  	  	蛋白质: %s  	碳水: %s  	脂肪: %s" % (('%.1f' % food.protein_total),
-                                                             ('%.1f' % food.carbohydrate_total),
-                                                             ('%.1f' % food.fat_total)))
+            if self.detail:
+                print("  	  	蛋白质: %s  	碳水: %s  	脂肪: %s" % (('%.1f' % food.protein_total),
+                                                                 ('%.1f' % food.carbohydrate_total),
+                                                                 ('%.1f' % food.fat_total)))
             if food.burdening:
                 print("  	  	%s" % food.burdening)
 
@@ -373,45 +375,46 @@ class WeightControlFactory:
         return eat.kcal_total
 
 
-def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity, bfr, week=0, prediction=False):
+def simulate(food_menu, args, week=0):
     """模拟体重下降的的饮食参考"""
-    wf = WeightControlFactory(weight, sex, age, height, food_menu, activity, bfr)
-    if prediction:
+    wf = WeightControlFactory(args.weight, args.sex, args.age, args.height, food_menu, args.activity, args.detail, args.bfr)
+    if args.prediction:
         print("# 第%s周" % (week + 1))
 
     bmi = wf.bmi
     bee = wf.bee
     # 一周摄入的总热量
 
-    week_kcal_total = wf.control_fat(plans)
+    week_kcal_total = wf.control_fat(args.plans, args.jt)
 
     # 以计划饮食的三大营养素预估的脂肪燃烧量
     lose_fat = (bee * 7 - week_kcal_total) / 7700
     # 计算当前体重
     wf.current_weight = wf.current_weight - lose_fat
     week += 1
-    print('')
-    print("#### 本周需要准备的食材:")
-    flag = 1
-    if len(plans) == 1:
-        flag = 7
-    for k, v in wf.week_food.items():
-        if v * flag > 0:
-            print("  	%s份\t%s" % ('%.1f' % (v * flag), k))
+    if len(args.plans) == 7:
+        print('')
+        print("#### 本周需要准备的食材:")
+        flag = 1
+        if len(args.plans) == 1:
+            flag = 7
+        for k, v in wf.week_food.items():
+            if v * flag > 0:
+                print("  	%s份\t%s" % ('%.1f' % (v * flag), k))
 
     print('')
     print("#### 平均数据:")
     print('')
     print("* 基础代谢: \t\t%skcal" % ('%.0f' % bmi))
     print("* 活动代谢: \t\t%skcal" % ('%.0f' % bee))
-    print("* 日平均摄入: \t\t%skcal" % ('%.0f' % (week_kcal_total / len(plans))))
-    mean_kcal = (week_kcal_total - bee * len(plans)) / len(plans)
+    print("* 日平均摄入: \t\t%skcal" % ('%.0f' % (week_kcal_total / len(args.plans))))
+    mean_kcal = (week_kcal_total - bee * len(args.plans)) / len(args.plans)
     if mean_kcal > 0:
         print("* 日平均热量盈余: \t%skcal" % ('%.0f' % mean_kcal))
     else:
         print("* 日平均热量缺口: \t%skcal" % ('%.0f' % mean_kcal))
     print('')
-    if len(plans) == 7:
+    if len(args.plans) == 7:
         print("#### 以计划饮食热量推测:")
         print("* 本周预计体重: \t%s kg" % ('%.2f' % wf.current_weight))
         if lose_fat > 0:
@@ -419,7 +422,7 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
         else:
             print("* 本周预计增重: \t%s kg" % ('%.2f' % (lose_fat * -1)))
 
-    if prediction:
+    if args.prediction:
         week_forecast = ('%.2f' % ((wf.current_weight - target_weight) * 7700 / ((bee - week_kcal_total / 7) * 7)))
         if float(week_forecast) > 0:
             print("* 减至目标体重%skg 预计还需约 %s周" % (target_weight, week_forecast))
@@ -429,11 +432,10 @@ def simulate(weight, target_weight, food_menu, plans, sex, age, height, activity
     print("-------------------------------------------")
     print('')
 
-    if prediction:
+    if args.prediction:
         if wf.current_weight > target_weight:
             # 使用当前体重递归计算
-            simulate(wf.current_weight, target_weight, food_menu, plans, sex, age, height, activity, bfr, week,
-                     prediction)
+            simulate(food_menu, args, week)
         else:
             print("-------------------------------------------")
             print('预计需历时%s周, 可达到目标体重%skg' % (week, '%.2f' % wf.current_weight))
@@ -457,6 +459,8 @@ class Prepare:
                             type=float,
                             default=1.55,
                             choices=[1.2, 1.375, 1.55, 1.725, 1.9])
+        parser.add_argument("--jt", help="减少碳水(克)", type=int, default=0)
+
         # 几乎不动Calorie-Calculation=BMRx1.2
         # 稍微运动（每周1-3次）总需=BMRx1.375
         # 中度运动（每周3-5次）总需=BMRx1.55
@@ -473,6 +477,7 @@ class Prepare:
 
         group = parser.add_argument_group('prediction weight')
         group.add_argument("-p", "--prediction", help="是否预测", action="store_true")
+        group.add_argument("--detail", help="详情", action="store_true")
 
         group.add_argument("-t", "--target_weight", help="目标体重", type=float)
 
@@ -494,7 +499,6 @@ class Prepare:
         food_menu['shake-z'] = 0
         food_menu['shake-d'] = 0
         food_menu['glucose'] = 0
-        food_menu['egg-white'] = 0
 
         # 通用类食物
         food_menu['oil'] = 4
@@ -503,6 +507,8 @@ class Prepare:
         # food_menu['nuts'] = 4
 
         food_menu['egg'] = 2
+        food_menu['egg-white'] = 4
+
         food_menu['powder2'] = 4.5
         food_menu['milk'] = 0
         food_menu['beef'] = 2
@@ -511,16 +517,7 @@ class Prepare:
         # 最后吃碳水类
         food_menu['oat'] = 2
         food_menu['rice'] = -1
-        simulate(args.weight,
-                 args.target_weight,
-                 food_menu,
-                 args.plans,
-                 args.sex,
-                 args.age,
-                 args.height,
-                 args.activity,
-                 args.bfr,
-                 prediction=args.prediction)
+        simulate(food_menu, args)
 
 
 def main(argv=sys.argv[1:]):
