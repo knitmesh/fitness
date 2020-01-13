@@ -16,6 +16,8 @@ nutrient_map = {
         "assign_foods": {
             'glucose': 0,
             'shake-g': 1,
+            'egg': 2,
+            'egg-white': 2
         },
     },
     "increase": {
@@ -27,6 +29,8 @@ nutrient_map = {
         "assign_foods": {
             'glucose': 80,
             'shake-g': 1,
+            'egg': 2,
+            'egg-white': 2
         },
     },
     "high": {
@@ -35,7 +39,11 @@ nutrient_map = {
         "ZF": 1,
         "TS": 3.5,
         "exclude_foods": [],
-        "assign_foods": {'shake-z': 1},
+        "assign_foods": {
+            'shake-z': 1,
+            'egg': 2,
+            'egg-white': 4,
+        },
     },
     "middle": {
         "alias": "中碳日",
@@ -43,7 +51,11 @@ nutrient_map = {
         "ZF": 1,
         "TS": 2.5,
         "exclude_foods": [],
-        "assign_foods": {'shake-z': 1, 'powder': 2, 'egg-white': 6},
+        "assign_foods": {
+            'shake-z': 1,
+            'egg': 4,
+            'egg-white': 4
+        },
     },
     "low": {
         "alias": "低碳日",
@@ -51,7 +63,10 @@ nutrient_map = {
         "ZF": 1.2,
         "TS": 1.5,
         "exclude_foods": ['powder'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 8},
+        "assign_foods": {
+            'shake-d': 1,
+            'egg': 8
+        },
     },
     "none": {
         "alias": "断碳日",
@@ -59,7 +74,10 @@ nutrient_map = {
         "ZF": 1.2,
         "TS": 0.5,
         "exclude_foods": ['milk', 'oat', 'powder', 'powder2'],
-        "assign_foods": {'shake-d': 1, 'egg-white': 8},
+        "assign_foods": {
+            'shake-d': 1,
+            'egg': 10
+        },
     },
 }
 nutrient_name_map = {
@@ -501,6 +519,7 @@ class Prepare:
         food_menu['shake-z'] = 0
         food_menu['shake-d'] = 0
         food_menu['glucose'] = 0
+        food_menu['egg-white'] = 0
 
         # 通用类食物
         food_menu['oil'] = 4
@@ -509,7 +528,6 @@ class Prepare:
         # food_menu['nuts'] = 4
 
         food_menu['egg'] = 2
-        food_menu['egg-white'] = 4
 
         food_menu['powder2'] = 4.5
         food_menu['milk'] = 0
